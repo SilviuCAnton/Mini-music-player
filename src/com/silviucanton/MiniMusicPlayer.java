@@ -1,42 +1,44 @@
 package com.silviucanton;
 
 import javax.swing.*;
-import java.io.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.sound.midi.*;
 
-public class MiniMusicPlayer {
+public class MiniMusicPlayer implements ActionListener {
 	
 	static JFrame f = new JFrame("My First Music Video");
 	static MyDrawPanel m1;
+	static JButton b;
 
 	public static void main(String[] args) {
+		MiniMusicPlayer mini = new MiniMusicPlayer();
+		mini.go();
 	}
 	
 	public void setUpGUI() {
 		/*
 		 * Initializeaza GUI-ul
 		 */
+		b = new JButton("Start");
+		b.addActionListener(this);
+		f.getContentPane().add(BorderLayout.SOUTH, b);
+		
 		m1 = new MyDrawPanel();
-		f.setContentPane(m1);
+		f.getContentPane().add(BorderLayout.CENTER, m1);
+		
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setBounds(30, 30, 300, 300);
 		f.setVisible(true);
 	}
 	
 	public void go() {
+		/*
+		 * Seteaza GUI- ul
+		 */
 		setUpGUI();
-		
-		try {
-			
-			Sequencer sequencer = MidiSystem.getSequencer();
-			sequencer.open();
-			sequencer.addControllerEventListener(m1, new int[] {127});
-			Sequence seq = new Sequence(Sequence.PPQ, 4);
-			Track track = seq.createTrack();
-			
-		} catch (Exception ex ) {
-			ex.printStackTrace();
-		}
 	}
 	
 	public MidiEvent makeEvent(int cmd, int chan, int one, int two, int tick) {
@@ -96,6 +98,32 @@ public class MiniMusicPlayer {
 				msg = false;
 				
 			}
+		}
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		try {
+			
+			Sequencer sequencer = MidiSystem.getSequencer();
+			sequencer.open();
+			sequencer.addControllerEventListener(m1, new int[] {127});
+			Sequence seq = new Sequence(Sequence.PPQ, 4);
+			Track track = seq.createTrack();
+			
+			int r = 0;
+			for (int i = 0; i < 60; i+= 4) {
+				
+				r = (int) ((Math.random() * 70) + 1);
+				track.add(makeEvent(144, 1, r, 100, i));
+				track.add(makeEvent(176, 1, 127, 0, i));
+				track.add(makeEvent(128, 1, r, 100, i + 2));
+			}
+			
+			sequencer.setSequence(seq);
+			sequencer.start();
+			sequencer.setTempoInBPM(120);
+		} catch (Exception ex ) {
+			ex.printStackTrace();
 		}
 	}
 
