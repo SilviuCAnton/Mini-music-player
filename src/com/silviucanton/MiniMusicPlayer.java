@@ -13,10 +13,52 @@ public class MiniMusicPlayer {
 	public static void main(String[] args) {
 	}
 	
+	public void setUpGUI() {
+		/*
+		 * Initializeaza GUI-ul
+		 */
+		m1 = new MyDrawPanel();
+		f.setContentPane(m1);
+		f.setBounds(30, 30, 300, 300);
+		f.setVisible(true);
+	}
+	
+	public void go() {
+		setUpGUI();
+		
+		try {
+			
+			Sequencer sequencer = MidiSystem.getSequencer();
+			sequencer.open();
+			sequencer.addControllerEventListener(m1, new int[] {127});
+			Sequence seq = new Sequence(Sequence.PPQ, 4);
+			Track track = seq.createTrack();
+			
+		} catch (Exception ex ) {
+			ex.printStackTrace();
+		}
+	}
+	
+	public MidiEvent makeEvent(int cmd, int chan, int one, int two, int tick) {
+		/*
+		 * Creeaza un MidiEvent mai rapid, nu mai trebuie declarat manual mesajul de instructiuni MIDI
+		 */
+		MidiEvent event = null;
+		try {
+			ShortMessage a = new ShortMessage(cmd, chan, one, two);
+			event = new MidiEvent(a, tick);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return event;
+	}
+	
 	
 	class MyDrawPanel extends JPanel implements ControllerEventListener {
 		/*
-		 * Inner Class pentru a putea implementa grafica in GUI
+		 * Inner Class pentru a putea implementa grafica in GUI astfel incat sa poata implementa interefata
+		 * de Listener
 		 */
 		
 		private static final long serialVersionUID = 1L;
